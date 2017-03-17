@@ -38,6 +38,8 @@ To launch a shell in your app:
 Use .gitlab-ci.yml
 ------------------
 
+Install a runner: https://docs.gitlab.com/runner/install/
+
 **.gitlab-ci.yml**
 - Define stages (prepare, install ..)
 - Define jobs (clean, dependencies ..)
