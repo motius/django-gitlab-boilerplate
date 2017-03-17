@@ -1,0 +1,33 @@
+version: '2'
+# Variables are set in .env and .gitlab-ci.yml (for staging build)
+# Make sure to add cleanup of new services for your app in the .gitlab-ci.yml build process (in prepare stage)
+
+services:
+  redis:
+    image: redis:alpine
+
+  db:
+    image: postgres:alpine
+    container_name: ${CONTAINER_NAME}-db
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PW}
+
+  app:
+    build:
+      context: .
+    image: ${IMAGE_NAME}
+    environment:
+      DJANGO_SETTINGS_MODULE: ${DJANGO_SETTINGS_MODULE}
+      DB_USER: ${DB_USER}
+      DB_NAME: ${DB_NAME}
+      DB_PW: ${DB_PW}
+      DB_HOST: "db"
+    container_name: ${CONTAINER_NAME}
+    ports:
+      - 8000:8000
+    volumes:
+      - /build/
+    depends_on:
+      - db
+      - redis

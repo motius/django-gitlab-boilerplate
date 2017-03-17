@@ -1,0 +1,68 @@
+# Stages are run in sequence, jobs in the same stage are run in parallel
+# See https://docs.gitlab.com/ce/ci/yaml/
+# TODO: Correct the tags to fit your gitlab
+stages:
+  - prepare
+  - install
+  - push
+  - deploy
+
+# Specify custom variables
+variables:
+  # Enables multibranch build
+  COMPOSE_PROJECT_NAME: $CI_PROJECT_NAME-$CI_BUILD_REF_NAME
+  # How to store the image
+  IMAGE_NAME: $CI_REGISTRY_IMAGE:$CI_BUILD_REF_NAME
+
+# Prepare
+# -------
+# Removes old images and containers, if they exist
+prepare:clean:
+  stage: prepare
+  script:
+    # Stop all containers
+    - docker-compose stop
+    # Remove all containers and volumes
+    - docker-compose rm -v
+  tags:
+    - meetup
+
+# Install
+# -------
+# Build all images
+install:containers:
+  stage: install
+  script:
+    # Build the Containers without caching and newest source image
+    - docker-compose build --pull --no-cache
+  tags:
+    - meetup
+
+# Push
+# ----
+# Pushes the Docker image to th registry for selected tags
+push:image:
+  stage: push
+  script:
+    # Login to the registry
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    # Push images to the gitlab remote
+    - docker-compose push
+  # Only these branches are getting pushed
+  only:
+    - develop
+    - master
+    - tags
+  tags:
+    - meetup
+
+# Deploy
+# ------
+# Starts the containers
+deploy:http:
+  stage: deploy
+  script:
+    # Bring up the app
+    - docker-compose up -d app
+  tags:
+    - meetup

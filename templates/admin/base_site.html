@@ -1,0 +1,14 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static log %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django API Admin') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django API') }}</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block extrastyle %}
+<link href="{{ STATIC_URL }}css/admin-extra.css" rel="stylesheet" type="text/css" media="screen,projection" />
+{% endblock %}
